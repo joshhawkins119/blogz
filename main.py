@@ -20,8 +20,10 @@ class BlogHandler(webapp2.RequestHandler):
             The user parameter will be a User object.
         """
 
-        # TODO - filter the query so that only posts by the given user
-        return None
+        query = Post.all().filter('author =', user).order('-created')
+        return query.fetch(limit=limit, offset=offset)
+
+
 
     def get_user_by_name(self, username):
         """ Get a user object from the db, based on their username """
@@ -189,7 +191,7 @@ class SignupHandler(BlogHandler):
         if not email:
             return ""
 
-        EMAIL_RE = re.compile(r"^[\S]+@[\S]+.[\S]+$")
+        EMAIL_RE = re.compile(r"^[\S]+@[\S]+\.[\S]+$")
         if EMAIL_RE.match(email):
             return email
 
@@ -251,14 +253,13 @@ class SignupHandler(BlogHandler):
 
         if has_error:
             t = jinja_env.get_template("signup.html")
-            response = t.render(username=username, email=email, errors=errors)
+            response = t.render(username=username, email=submitted_email, errors=errors)
             self.response.out.write(response)
         else:
             self.redirect('/blog/newpost')
 
 class LoginHandler(BlogHandler):
 
-    # TODO - The login code here is mostly set up for you, but there isn't a template to log in
 
     def render_login_form(self, error=""):
         """ Render the login form with or without an error, based on parameters """
